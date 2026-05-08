@@ -705,7 +705,7 @@ public function allowedCountries(Basket $basket, $allowedCountry): bool
         if($paymentResponseData['result']['status'] == 'SUCCESS') {
             $dueDate = !empty($paymentResponseData['transaction']['due_date']) ? $paymentResponseData['transaction']['due_date'] : '';
             // Add the Bank details for the invoice payments
-        if(in_array($paymentResponseData['payment_method'], ['novalnet_invoice', 'novalnet_guaranteed_invoice', 'novalnet_prepayment', 'novalnet_instalment_invoice'])  && $paymentResponseData['instalment']['cancel_type'] != 'ALL_CYCLES') {
+        if(in_array($paymentResponseData['payment_method'], ['novalnet_invoice', 'novalnet_guaranteed_invoice', 'novalnet_prepayment', 'novalnet_instalment_invoice'])  && !in_array($paymentResponseData['instalment']['cancel_type'], ['ALL_CYCLES', 'REMAINING_CYCLES'])) {
                 if(empty($paymentResponseData['transaction']['bank_details']) ) {
             $this->getSavedPaymentDetails($paymentResponseData);
                 }
@@ -723,12 +723,16 @@ public function allowedCountries(Basket $basket, $allowedCountry): bool
                 $additionalInfo['cycle_amount']           = $paymentResponseData['instalment']['cycle_amount'];
             }
 
-            if($paymentResponseData['instalment']['cancel_type'] == 'ALL_CYCLES'){
+            if(in_array($paymentResponseData['instalment']['cancel_type'], ['ALL_CYCLES', 'REMAINING_CYCLES'])){
 
                 $additionalInfo['bookingText'] =  $paymentResponseData['bookingText'];
 
             }
 
+            $this->getLogger(__METHOD__)->error('getprocessPayment', [
+                '$path' => $paymentResponseData,
+            ]);
+            
             // Add the Bank details for the invoice payments
              if(isset($paymentResponseData['instalment']['pending_cycles']) ) {
                 $additionalInfo['pending_cycles']         = $paymentResponseData['instalment']['pending_cycles'];
@@ -764,6 +768,12 @@ public function allowedCountries(Basket $basket, $allowedCountry): bool
         if($this->settingsService->getPaymentSettingsValue('payment_action', $paymentResponseData['payment_method']) && $this->settingsService->getPaymentSettingsValue('payment_action', $paymentResponseData['payment_method']) == '2') {
             $additionalInfo['zero_amount'] = '1';
         }
+
+        $this->getLogger(__METHOD__)->error('getinstallment', [
+            '$install' => $additionalInfo,
+        ]);
+        
+
         return json_encode($additionalInfo);
     }
 
@@ -1141,6 +1151,7 @@ public function allowedCountries(Basket $basket, $allowedCountry): bool
                 $invoiceComments = PHP_EOL . PHP_EOL . sprintf($this->paymentHelper->getTranslatedText('transfer_amount_text'), $transactionData['amount'], $transactionData['currency']);
             }
         }
+
         $invoiceComments .= PHP_EOL . $this->paymentHelper->getTranslatedText('account_holder_novalnet') . $transactionData['invoice_account_holder'];
         $invoiceComments .= PHP_EOL . $this->paymentHelper->getTranslatedText('iban') . $transactionData['invoice_iban'];
         $invoiceComments .= PHP_EOL . $this->paymentHelper->getTranslatedText('bic') . $transactionData['invoice_bic'];
@@ -1162,6 +1173,10 @@ public function allowedCountries(Basket $basket, $allowedCountry): bool
             $invoiceComments = $transactionData['bookingText'] ;
 
         }
+
+        $this->getLogger(__METHOD__)->error('final', [
+            '$final' =>  $invoiceComments,                                
+        ]);
 
         return $invoiceComments;
     }
@@ -1396,6 +1411,12 @@ public function allowedCountries(Basket $basket, $allowedCountry): bool
            $paymentResponseData['transaction']['bank_details']['qr_image']       = $transactionData['qr_image'];
            $paymentResponseData['transaction']['invoice_ref']                    = $transactionData['invoice_ref'];
            $paymentResponseData['payment_method']                                = $transactionData['paymentName'];
+       }
+
+       if(in_array($paymentResponseData['instalment']['cancel_type'], ['ALL_CYCLES', 'REMAINING_CYCLES'])){
+
+        $paymentResponseData['bookingText'] =  $transactionData['bookingText'];
+
        }
        if($transactionData['paymentName'] == 'novalnet_multibanco') {
            $paymentResponseData['transaction']['partner_payment_reference'] = $transactionData['partner_payment_reference'];
