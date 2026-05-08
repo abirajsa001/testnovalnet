@@ -729,6 +729,11 @@ public function allowedCountries(Basket $basket, $allowedCountry): bool
 
             }
 
+            if($paymentResponseData['instalment']['prepaid'] == '1')
+            {
+                $additionalInfo['prepaid'] = $paymentResponseData['instalment']['prepaid'];
+
+            }
             $this->getLogger(__METHOD__)->error('getprocessPayment', [
                 '$path' => $paymentResponseData,
             ]);
@@ -768,11 +773,6 @@ public function allowedCountries(Basket $basket, $allowedCountry): bool
         if($this->settingsService->getPaymentSettingsValue('payment_action', $paymentResponseData['payment_method']) && $this->settingsService->getPaymentSettingsValue('payment_action', $paymentResponseData['payment_method']) == '2') {
             $additionalInfo['zero_amount'] = '1';
         }
-
-        $this->getLogger(__METHOD__)->error('getinstallment', [
-            '$install' => $additionalInfo,
-        ]);
-        
 
         return json_encode($additionalInfo);
     }
@@ -1085,7 +1085,7 @@ public function allowedCountries(Basket $basket, $allowedCountry): bool
             }
         }
         // Form the bank details for invoice payments
-        if((in_array($transactionData['paymentName'], ['novalnet_invoice', 'novalnet_prepayment']) && !in_array($transactionData['tx_status'], ['DEACTIVATED', 'FAILURE'])) || (in_array($transactionData['paymentName'], ['novalnet_guaranteed_invoice', 'novalnet_instalment_invoice']) && !in_array($transactionData['tx_status'], ['PENDING', 'DEACTIVATED', 'FAILURE']))) {
+        if((in_array($transactionData['paymentName'], ['novalnet_invoice', 'novalnet_prepayment']) && !in_array($transactionData['tx_status'], ['DEACTIVATED', 'FAILURE'])) || (in_array($transactionData['paymentName'], ['novalnet_guaranteed_invoice', 'novalnet_instalment_invoice']) && !in_array($transactionData['tx_status'], ['PENDING', 'DEACTIVATED', 'FAILURE'])) && !isset($transactionData['prepaid']) ) {
             $transactionComments .= PHP_EOL . $this->getBankDetailsInformation($transactionData);
         }
         // Form the instalment details for instalment payments
