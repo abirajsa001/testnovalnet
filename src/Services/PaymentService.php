@@ -725,7 +725,7 @@ public function allowedCountries(Basket $basket, $allowedCountry): bool
 
             if($paymentResponseData['instalment']['cancel_type'] == 'ALL_CYCLES'){
 
-                $additionalInfo['bookingText'] =  $paymentResponseData['bookingText']
+                $additionalInfo['bookingText'] =  $paymentResponseData['bookingText'];
 
             }
 
