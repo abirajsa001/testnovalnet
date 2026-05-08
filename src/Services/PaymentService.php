@@ -1186,6 +1186,11 @@ public function allowedCountries(Basket $basket, $allowedCountry): bool
             }
             $InstalmentComments .= $this->paymentHelper->getTranslatedText('instalment_cycle_amount') .  str_replace('.', ',', sprintf('%0.2f',$transactionData['cycle_amount'] / 100)) . '  ' . $transactionData['currency'] . PHP_EOL ;
         }
+        if(in_array($transactionData['paymentName'], ['novalnet_instalment_sepa', 'novalnet_instalment_invoice']) && isset($transactionData['bookingText'])) {
+
+            $invoiceComments = $transactionData['bookingText'] ;
+
+        }
         return $InstalmentComments;
     }
 
