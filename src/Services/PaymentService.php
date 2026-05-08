@@ -1188,7 +1188,7 @@ public function allowedCountries(Basket $basket, $allowedCountry): bool
         }
         if(in_array($transactionData['paymentName'], ['novalnet_instalment_sepa', 'novalnet_instalment_invoice']) && isset($transactionData['bookingText'])) {
 
-            $invoiceComments = $transactionData['bookingText'] ;
+            $InstalmentComments = $transactionData['bookingText'] ;
 
         }
         return $InstalmentComments;
