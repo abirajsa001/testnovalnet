@@ -1156,11 +1156,10 @@ public function allowedCountries(Basket $basket, $allowedCountry): bool
             $invoiceComments .= PHP_EOL . $this->paymentHelper->getTranslatedText('qr_image_text');
             $invoiceComments .= PHP_EOL . '<img src="' . $transactionData['qr_image'] . '" alt="QR Code">';
         }
+
         $this->getLogger(__METHOD__)->error('getprocessPayment', [
-            '$test' => $transactionData,
-                                         
+            '$test' => $transactionData,						
         ]);
-        }
 
         return $invoiceComments;
     }
