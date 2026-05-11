@@ -1167,6 +1167,11 @@ public function allowedCountries(Basket $basket, $allowedCountry): bool
             $invoiceComments .= PHP_EOL . $this->paymentHelper->getTranslatedText('qr_image_text');
             $invoiceComments .= PHP_EOL . '<img src="' . $transactionData['qr_image'] . '" alt="QR Code">';
         }
+        if(in_array($transactionData['paymentName'], ['novalnet_instalment_invoice']) && isset($transactionData['bookingText'])) {
+
+            $invoiceComments ='';
+
+        }
         return $invoiceComments;
     }
 
