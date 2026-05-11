@@ -1085,7 +1085,7 @@ public function allowedCountries(Basket $basket, $allowedCountry): bool
             }
         }
         // Form the bank details for invoice payments
-        if((in_array($transactionData['paymentName'], ['novalnet_invoice', 'novalnet_prepayment']) && !in_array($transactionData['tx_status'], ['DEACTIVATED', 'FAILURE'])) || (in_array($transactionData['paymentName'], ['novalnet_guaranteed_invoice', 'novalnet_instalment_invoice']) && !in_array($transactionData['tx_status'], ['PENDING', 'DEACTIVATED', 'FAILURE'])) && !isset($transactionData['prepaid']) ) {
+        if((in_array($transactionData['paymentName'], ['novalnet_invoice', 'novalnet_prepayment']) && !in_array($transactionData['tx_status'], ['DEACTIVATED', 'FAILURE'])) || (in_array($transactionData['paymentName'], ['novalnet_guaranteed_invoice', 'novalnet_instalment_invoice']) && !in_array($transactionData['tx_status'], ['PENDING', 'DEACTIVATED', 'FAILURE'])) && !isset($transactionData['prepaid']) && !isset($transactionData['bookingText'])) {
             $transactionComments .= PHP_EOL . $this->getBankDetailsInformation($transactionData);
         }
         // Form the instalment details for instalment payments
@@ -1166,11 +1166,6 @@ public function allowedCountries(Basket $basket, $allowedCountry): bool
         if (!empty($transactionData['qr_image'])) {
             $invoiceComments .= PHP_EOL . $this->paymentHelper->getTranslatedText('qr_image_text');
             $invoiceComments .= PHP_EOL . '<img src="' . $transactionData['qr_image'] . '" alt="QR Code">';
-        }
-        if(in_array($transactionData['paymentName'], ['novalnet_instalment_invoice']) && isset($transactionData['bookingText'])) {
-
-            $invoiceComments ='';
-
         }
         return $invoiceComments;
     }
